@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
@@ -144,7 +145,7 @@ public class SecurityConfig {
                 // Allow H2 console frames (development only)
                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                 // XSS protection
-                .xssProtection(xss -> xss.headerValue("1; mode=block"))
+                .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                 // Content type options
                 .contentTypeOptions(contentType -> {})
                 // Strict transport security (HTTPS)

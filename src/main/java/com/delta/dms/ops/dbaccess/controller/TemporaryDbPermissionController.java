@@ -1,12 +1,12 @@
 package com.delta.dms.ops.dbaccess.controller;
 
-import com.delta.dms.ops.dto.BulkPermissionRequest;
-import com.delta.dms.ops.model.Permission;
-import com.delta.dms.ops.model.Permission.PermissionStatus;
-import com.delta.dms.ops.model.Permission.PermissionType;
-import com.delta.dms.ops.model.User;
-import com.delta.dms.ops.service.PermissionService;
-import com.delta.dms.ops.service.UserService;
+import com.delta.dms.ops.dbaccess.dto.BulkPermissionRequest;
+import com.delta.dms.ops.dbaccess.model.Permission;
+import com.delta.dms.ops.dbaccess.model.Permission.PermissionStatus;
+import com.delta.dms.ops.dbaccess.model.Permission.PermissionType;
+import com.delta.dms.ops.dbaccess.model.User;
+import com.delta.dms.ops.dbaccess.service.PermissionService;
+import com.delta.dms.ops.dbaccess.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +83,8 @@ public class TemporaryDbPermissionController {
 
         try {
             String currentUsername = authentication.getName();
-            User user = userService.getUserByUsername(request.getUserId());
+            User user = userService.getUserById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
             LocalDateTime startTime = LocalDateTime.now();
             LocalDateTime endTime = calculateEndTime(startTime, request.getDurationDays());

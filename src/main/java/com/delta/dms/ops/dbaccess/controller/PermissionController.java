@@ -1,10 +1,10 @@
 package com.delta.dms.ops.dbaccess.controller;
 
-import com.delta.dms.ops.model.Permission;
-import com.delta.dms.ops.model.User;
-import com.delta.dms.ops.repository.PermissionEventRepository;
-import com.delta.dms.ops.service.PermissionService;
-import com.delta.dms.ops.service.UserService;
+import com.delta.dms.ops.dbaccess.model.Permission;
+import com.delta.dms.ops.dbaccess.model.User;
+import com.delta.dms.ops.dbaccess.repository.PermissionEventRepository;
+import com.delta.dms.ops.dbaccess.service.PermissionService;
+import com.delta.dms.ops.dbaccess.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

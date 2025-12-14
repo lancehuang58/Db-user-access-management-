@@ -1,6 +1,6 @@
 package com.delta.dms.ops.dbaccess.event;
 
-import com.delta.dms.ops.model.Permission;
+import com.delta.dms.ops.dbaccess.model.Permission;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

@@ -1,8 +1,8 @@
 package com.delta.dms.ops.dbaccess.security;
 
-import com.delta.dms.ops.model.Role;
-import com.delta.dms.ops.model.User;
-import com.delta.dms.ops.repository.UserRepository;
+import com.delta.dms.ops.dbaccess.model.Role;
+import com.delta.dms.ops.dbaccess.model.User;
+import com.delta.dms.ops.dbaccess.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,10 +1,10 @@
 package com.delta.dms.ops.dbaccess.service;
 
-import com.delta.dms.ops.event.*;
-import com.delta.dms.ops.model.Permission;
-import com.delta.dms.ops.model.User;
-import com.delta.dms.ops.repository.PermissionRepository;
-import com.delta.dms.ops.repository.UserRepository;
+import com.delta.dms.ops.dbaccess.event.*;
+import com.delta.dms.ops.dbaccess.model.Permission;
+import com.delta.dms.ops.dbaccess.model.User;
+import com.delta.dms.ops.dbaccess.repository.PermissionRepository;
+import com.delta.dms.ops.dbaccess.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

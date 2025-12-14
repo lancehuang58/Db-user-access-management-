@@ -1,9 +1,8 @@
 package com.delta.dms.ops.dbaccess.controller;
 
-import com.delta.dms.ops.model.Role;
-import com.delta.dms.ops.model.User;
-import com.delta.dms.ops.repository.RoleRepository;
-import com.delta.dms.ops.service.UserService;
+import com.delta.dms.ops.dbaccess.model.User;
+import com.delta.dms.ops.dbaccess.repository.RoleRepository;
+import com.delta.dms.ops.dbaccess.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

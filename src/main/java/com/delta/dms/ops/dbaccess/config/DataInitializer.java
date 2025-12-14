@@ -1,9 +1,9 @@
 package com.delta.dms.ops.dbaccess.config;
 
-import com.delta.dms.ops.model.Role;
-import com.delta.dms.ops.model.User;
-import com.delta.dms.ops.repository.RoleRepository;
-import com.delta.dms.ops.repository.UserRepository;
+import com.delta.dms.ops.dbaccess.model.Role;
+import com.delta.dms.ops.dbaccess.model.User;
+import com.delta.dms.ops.dbaccess.repository.RoleRepository;
+import com.delta.dms.ops.dbaccess.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

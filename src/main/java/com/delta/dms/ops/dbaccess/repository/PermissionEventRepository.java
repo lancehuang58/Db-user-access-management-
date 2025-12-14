@@ -1,7 +1,7 @@
 package com.delta.dms.ops.dbaccess.repository;
 
-import com.delta.dms.ops.model.Permission;
-import com.delta.dms.ops.model.PermissionEvent;
+import com.delta.dms.ops.dbaccess.model.Permission;
+import com.delta.dms.ops.dbaccess.model.PermissionEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

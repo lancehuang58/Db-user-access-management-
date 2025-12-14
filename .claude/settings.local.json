@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(./gradlew compileJava:*)",
+      "Bash(gradle compileJava:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker ps:*)",
+      "Bash(gradle bootRun:*)",
+      "Bash(docker-compose down:*)"
+    ]
+  }
+}

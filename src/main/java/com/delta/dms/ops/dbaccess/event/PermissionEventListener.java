@@ -1,9 +1,9 @@
 package com.delta.dms.ops.dbaccess.event;
 
-import com.delta.dms.ops.model.Permission;
-import com.delta.dms.ops.model.PermissionEvent;
-import com.delta.dms.ops.repository.PermissionEventRepository;
-import com.delta.dms.ops.service.MariaDBEventService;
+import com.delta.dms.ops.dbaccess.model.Permission;
+import com.delta.dms.ops.dbaccess.model.PermissionEvent;
+import com.delta.dms.ops.dbaccess.repository.PermissionEventRepository;
+import com.delta.dms.ops.dbaccess.service.MariaDBEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

@@ -1,6 +1,6 @@
 package com.delta.dms.ops.dbaccess.repository;
 
-import com.delta.dms.ops.model.Role;
+import com.delta.dms.ops.dbaccess.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package com.delta.dms.ops.dbaccess.service;
 
-import com.delta.dms.ops.model.Permission;
+import com.delta.dms.ops.dbaccess.model.Permission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
