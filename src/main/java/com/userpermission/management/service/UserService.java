@@ -67,6 +67,24 @@ public class UserService {
         user.setFullName(updatedUser.getFullName());
         user.setEmail(updatedUser.getEmail());
         user.setEnabled(updatedUser.getEnabled());
+        user.setAccountNonLocked(updatedUser.getAccountNonLocked());
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public User updateUser(Long id, User updatedUser, String newPassword) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setFullName(updatedUser.getFullName());
+        user.setEmail(updatedUser.getEmail());
+        user.setEnabled(updatedUser.getEnabled());
+        user.setAccountNonLocked(updatedUser.getAccountNonLocked());
+
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
 
         return userRepository.save(user);
     }
