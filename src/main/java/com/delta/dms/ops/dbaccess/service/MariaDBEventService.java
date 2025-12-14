@@ -1,8 +1,8 @@
 package com.delta.dms.ops.dbaccess.service;
 
 import com.delta.dms.ops.dbaccess.model.Permission;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,11 +14,14 @@ import java.time.format.DateTimeFormatter;
  * Service for managing MariaDB users and database events for automatic permission revocation
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class MariaDBEventService {
 
     private final JdbcTemplate jdbcTemplate;
+
+    public MariaDBEventService(@Qualifier("mariadbJdbcTemplate") JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
