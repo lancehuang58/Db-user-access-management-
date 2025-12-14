@@ -6,6 +6,7 @@ import com.userpermission.management.repository.RoleRepository;
 import com.userpermission.management.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,18 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.admin.username}")
+    private String adminUsername;
+
+    @Value("${app.admin.password}")
+    private String adminPassword;
+
+    @Value("${app.admin.email}")
+    private String adminEmail;
+
+    @Value("${app.admin.full-name}")
+    private String adminFullName;
 
     @Override
     public void run(String... args) {
@@ -41,12 +54,12 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeDefaultAdmin() {
-        if (!userRepository.existsByUsername("admin")) {
+        if (!userRepository.existsByUsername(adminUsername)) {
             User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setEmail("admin@example.com");
-            admin.setFullName("System Administrator");
+            admin.setUsername(adminUsername);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
+            admin.setEmail(adminEmail);
+            admin.setFullName(adminFullName);
             admin.setEnabled(true);
 
             Role adminRole = roleRepository.findByName(Role.RoleName.ROLE_ADMIN)
@@ -54,8 +67,8 @@ public class DataInitializer implements CommandLineRunner {
             admin.getRoles().add(adminRole);
 
             userRepository.save(admin);
-            log.info("Created default admin user (username: admin, password: admin123)");
-            log.warn("IMPORTANT: Please change the default admin password!");
+            log.info("Created default admin user (username: {}, email: {})", adminUsername, adminEmail);
+            log.warn("IMPORTANT: Please change the default admin password in production!");
         }
     }
 
