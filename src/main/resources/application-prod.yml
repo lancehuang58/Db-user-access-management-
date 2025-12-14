@@ -40,7 +40,7 @@ jwt:
 logging:
   level:
     root: WARN
-    com.userpermission.management: INFO
+    com.delta.dms.ops: INFO
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
   file:

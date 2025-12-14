@@ -256,10 +256,10 @@
                                         <span th:text="${permission.user.username}"></span>
                                     </h6>
                                     <span class="badge"
-                                          th:classappend="${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE} ? 'bg-success' :
-                                                         ${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).PENDING} ? 'bg-warning' :
-                                                         ${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).APPROVED} ? 'bg-info' :
-                                                         ${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).EXPIRED} ? 'bg-secondary' : 'bg-danger'"
+                                          th:classappend="${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).ACTIVE} ? 'bg-success' :
+                                                         ${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).PENDING} ? 'bg-warning' :
+                                                         ${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).APPROVED} ? 'bg-info' :
+                                                         ${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).EXPIRED} ? 'bg-secondary' : 'bg-danger'"
                                           th:text="${permission.status}">
                                     </span>
                                 </div>
@@ -290,7 +290,7 @@
 
                                 <!-- Action Buttons -->
                                 <div class="btn-group w-100" role="group"
-                                     th:if="${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE}">
+                                     th:if="${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).ACTIVE}">
                                     <div class="dropdown">
                                         <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100"
                                                 type="button" data-bs-toggle="dropdown">
@@ -328,7 +328,7 @@
                                     </div>
                                 </div>
 
-                                <form th:if="${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE}"
+                                <form th:if="${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).ACTIVE}"
                                       th:action="@{/temp-permissions/{id}/cancel(id=${permission.id})}"
                                       method="post" class="mt-2"
                                       onsubmit="return confirm('確定要撤銷此權限嗎？');">
