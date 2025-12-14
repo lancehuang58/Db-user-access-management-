@@ -4,7 +4,7 @@ spring:
 
   # Database Configuration (PostgreSQL) - Primary app database
   datasource:
-    url: jdbc:postgresql://localhost:5432/userdb
+    jdbc-url: jdbc:postgresql://localhost:5432/userdb
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:password}
@@ -13,18 +13,7 @@ spring:
       minimum-idle: 5
       connection-timeout: 30000
 
-# Target MariaDB Configuration - Database where users/permissions are managed
-mariadb:
-  datasource:
-    jdbc-url: jdbc:mariadb://localhost:3306/mysql
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: ${MARIADB_USERNAME:root}
-    password: ${MARIADB_PASSWORD:rootpass}
-    maximum-pool-size: 5
-    minimum-idle: 2
-    connection-timeout: 30000
-
-  # JPA Configuration
+  # JPA Configuration (uses PostgreSQL datasource above)
   jpa:
     hibernate:
       ddl-auto: update
@@ -53,6 +42,38 @@ mariadb:
             instanceName: UserPermissionScheduler
           threadPool:
             threadCount: 5
+
+# Target MariaDB Configuration - Database where users/permissions are managed
+mariadb:
+  datasource:
+    jdbc-url: jdbc:mariadb://localhost:3306/mysql
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: ${MARIADB_USERNAME:root}
+    password: ${MARIADB_PASSWORD:rootpass}
+    maximum-pool-size: 5
+    minimum-idle: 2
+    connection-timeout: 30000
+    # Query timeout in seconds (prevents hanging queries)
+    query-timeout: 30
+
+  # MariaDB User Management Configuration
+  user-management:
+    # Default host pattern for created users (% = any host, localhost = local only)
+    default-host: ${MARIADB_DEFAULT_HOST:%}
+    # Length of auto-generated passwords (minimum 8, recommended 20+)
+    password-length: ${MARIADB_PASSWORD_LENGTH:20}
+    # Query timeout in seconds for user management operations
+    query-timeout: ${MARIADB_QUERY_TIMEOUT:30}
+    # Retry configuration for transient failures
+    retry:
+      # Maximum number of retry attempts for transient database errors
+      max-attempts: ${MARIADB_RETRY_MAX_ATTEMPTS:3}
+      # Initial backoff delay in milliseconds (exponential backoff)
+      backoff-delay: ${MARIADB_RETRY_BACKOFF_DELAY:1000}
+      # Backoff multiplier for exponential backoff
+      backoff-multiplier: ${MARIADB_RETRY_BACKOFF_MULTIPLIER:2.0}
+      # Maximum backoff delay in milliseconds
+      max-backoff-delay: ${MARIADB_RETRY_MAX_BACKOFF_DELAY:5000}
 
 # Server Configuration
 server:

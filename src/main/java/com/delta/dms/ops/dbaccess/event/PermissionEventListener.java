@@ -1,5 +1,7 @@
 package com.delta.dms.ops.dbaccess.event;
 
+import com.delta.dms.ops.dbaccess.exception.MariaDBOperationException;
+import com.delta.dms.ops.dbaccess.exception.MariaDBValidationException;
 import com.delta.dms.ops.dbaccess.model.Permission;
 import com.delta.dms.ops.dbaccess.model.PermissionEvent;
 import com.delta.dms.ops.dbaccess.repository.PermissionEventRepository;
@@ -7,6 +9,9 @@ import com.delta.dms.ops.dbaccess.service.MariaDBEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +71,12 @@ public class PermissionEventListener {
     @EventListener
     @Async
     @Transactional
+    @Retryable(
+        retryFor = {DataAccessException.class, MariaDBOperationException.class},
+        noRetryFor = {MariaDBValidationException.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000)
+    )
     public void handlePermissionActivated(PermissionActivatedEvent event) {
         log.info("Handling PermissionActivatedEvent for permission {}", event.getPermission().getId());
 
@@ -89,8 +100,43 @@ public class PermissionEventListener {
             permissionEvent.setEventTime(LocalDateTime.now());
             eventRepository.save(permissionEvent);
 
+        } catch (MariaDBValidationException e) {
+            // Validation errors should not be retried
+            log.error("Validation error activating permission: {}", e.getMessage(), e);
+
+            // Log the failure
+            PermissionEvent permissionEvent = new PermissionEvent();
+            permissionEvent.setPermission(permission);
+            permissionEvent.setEventType(PermissionEvent.EventType.ACTIVATED);
+            permissionEvent.setTriggeredBy("SYSTEM");
+            permissionEvent.setEventDetails(String.format(
+                "Failed to activate permission (validation error): %s", e.getMessage()
+            ));
+            permissionEvent.setEventTime(LocalDateTime.now());
+            eventRepository.save(permissionEvent);
+
+        } catch (MariaDBOperationException e) {
+            // Check if retryable
+            if (e.isRetryable()) {
+                log.warn("Retryable error activating permission (will retry): {}", e.getMessage());
+                throw e;  // Re-throw to trigger retry
+            } else {
+                log.error("Non-retryable error activating permission: {}", e.getMessage(), e);
+
+                // Log the failure
+                PermissionEvent permissionEvent = new PermissionEvent();
+                permissionEvent.setPermission(permission);
+                permissionEvent.setEventType(PermissionEvent.EventType.ACTIVATED);
+                permissionEvent.setTriggeredBy("SYSTEM");
+                permissionEvent.setEventDetails(String.format(
+                    "Failed to activate permission: %s", e.getMessage()
+                ));
+                permissionEvent.setEventTime(LocalDateTime.now());
+                eventRepository.save(permissionEvent);
+            }
+
         } catch (Exception e) {
-            log.error("Failed to grant MariaDB permission: {}", e.getMessage(), e);
+            log.error("Unexpected error activating permission: {}", e.getMessage(), e);
 
             // Log the failure
             PermissionEvent permissionEvent = new PermissionEvent();
@@ -108,6 +154,12 @@ public class PermissionEventListener {
     @EventListener
     @Async
     @Transactional
+    @Retryable(
+        retryFor = {DataAccessException.class, MariaDBOperationException.class},
+        noRetryFor = {MariaDBValidationException.class},
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000)
+    )
     public void handlePermissionRevoked(PermissionRevokedEvent event) {
         log.info("Handling PermissionRevokedEvent for permission {}", event.getPermission().getId());
 
@@ -130,8 +182,43 @@ public class PermissionEventListener {
             permissionEvent.setEventTime(LocalDateTime.now());
             eventRepository.save(permissionEvent);
 
+        } catch (MariaDBValidationException e) {
+            // Validation errors should not be retried
+            log.error("Validation error revoking permission: {}", e.getMessage(), e);
+
+            // Log the failure
+            PermissionEvent permissionEvent = new PermissionEvent();
+            permissionEvent.setPermission(permission);
+            permissionEvent.setEventType(PermissionEvent.EventType.REVOKED);
+            permissionEvent.setTriggeredBy(event.getRevokedBy());
+            permissionEvent.setEventDetails(String.format(
+                "Failed to revoke permission (validation error): %s", e.getMessage()
+            ));
+            permissionEvent.setEventTime(LocalDateTime.now());
+            eventRepository.save(permissionEvent);
+
+        } catch (MariaDBOperationException e) {
+            // Check if retryable
+            if (e.isRetryable()) {
+                log.warn("Retryable error revoking permission (will retry): {}", e.getMessage());
+                throw e;  // Re-throw to trigger retry
+            } else {
+                log.error("Non-retryable error revoking permission: {}", e.getMessage(), e);
+
+                // Log the failure
+                PermissionEvent permissionEvent = new PermissionEvent();
+                permissionEvent.setPermission(permission);
+                permissionEvent.setEventType(PermissionEvent.EventType.REVOKED);
+                permissionEvent.setTriggeredBy(event.getRevokedBy());
+                permissionEvent.setEventDetails(String.format(
+                    "Failed to revoke permission: %s", e.getMessage()
+                ));
+                permissionEvent.setEventTime(LocalDateTime.now());
+                eventRepository.save(permissionEvent);
+            }
+
         } catch (Exception e) {
-            log.error("Failed to revoke MariaDB permission: {}", e.getMessage(), e);
+            log.error("Unexpected error revoking permission: {}", e.getMessage(), e);
 
             // Log the failure
             PermissionEvent permissionEvent = new PermissionEvent();

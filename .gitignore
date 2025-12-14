@@ -75,3 +75,6 @@ out/
 ### Application specific ###
 application-local.yml
 application-local.properties
+
+.claude
+gradle

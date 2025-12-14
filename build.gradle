@@ -51,12 +51,19 @@ dependencies {
     // Scheduling support
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
 
+    // Retry support for resilient operations
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework:spring-aspects'
+
     // Development tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+    testImplementation 'org.testcontainers:mariadb:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
 }
 
 tasks.named('test') {

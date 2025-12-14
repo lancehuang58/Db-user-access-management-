@@ -10,7 +10,15 @@
       "Bash(docker-compose down:*)",
       "Bash(cat:*)",
       "Bash(xargs:*)",
-      "Bash(gradle build:*)"
+      "Bash(gradle build:*)",
+      "Bash(gradle --version:*)",
+      "Bash(gradle wrapper:*)",
+      "Bash(./gradlew bootRun:*)",
+      "Bash(java:*)",
+      "Bash(/usr/libexec/java_home:*)",
+      "Bash(./gradlew clean compileJava:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)"
     ]
   }
 }

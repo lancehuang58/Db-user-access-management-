@@ -4,12 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
 
 /**
  * Application configuration properties
  */
 @Configuration
 @ConfigurationProperties(prefix = "app.permission")
+@EnableRetry
 @Getter
 @Setter
 public class AppConfig {
