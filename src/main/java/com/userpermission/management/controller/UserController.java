@@ -47,9 +47,14 @@ public class UserController {
     }
 
     @PostMapping
-    public String createUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+    public String createUser(@ModelAttribute User user,
+                            @RequestParam(required = false) List<Long> roleIds,
+                            RedirectAttributes redirectAttributes) {
         try {
-            userService.createUser(user);
+            User createdUser = userService.createUser(user);
+            if (roleIds != null && !roleIds.isEmpty()) {
+                userService.updateUserRoles(createdUser.getId(), roleIds);
+            }
             redirectAttributes.addFlashAttribute("success", "User created successfully");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to create user: " + e.getMessage());
@@ -58,10 +63,16 @@ public class UserController {
     }
 
     @PostMapping("/{id}")
-    public String updateUser(@PathVariable Long id, @ModelAttribute User user,
+    public String updateUser(@PathVariable Long id,
+                            @ModelAttribute User user,
+                            @RequestParam(required = false) List<Long> roleIds,
+                            @RequestParam(required = false) String newPassword,
                             RedirectAttributes redirectAttributes) {
         try {
-            userService.updateUser(id, user);
+            userService.updateUser(id, user, newPassword);
+            if (roleIds != null && !roleIds.isEmpty()) {
+                userService.updateUserRoles(id, roleIds);
+            }
             redirectAttributes.addFlashAttribute("success", "User updated successfully");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update user: " + e.getMessage());
