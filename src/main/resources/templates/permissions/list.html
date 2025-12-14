@@ -48,10 +48,10 @@
                                 <td th:text="${#temporals.format(permission.endTime, 'yyyy-MM-dd HH:mm')}"></td>
                                 <td>
                                     <span th:class="'badge bg-' +
-                                        ${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).PENDING ? 'warning' :
-                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).APPROVED ? 'info' :
-                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE ? 'success' :
-                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).EXPIRED ? 'secondary' :
+                                        ${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).PENDING ? 'warning' :
+                                          permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).APPROVED ? 'info' :
+                                          permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).ACTIVE ? 'success' :
+                                          permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).EXPIRED ? 'secondary' :
                                           'danger'}"
                                           th:text="${permission.status}">
                                     </span>

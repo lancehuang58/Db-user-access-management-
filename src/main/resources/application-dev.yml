@@ -24,7 +24,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.userpermission.management: DEBUG
+    com.delta.dms.ops: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
 

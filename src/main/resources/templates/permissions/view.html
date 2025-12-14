@@ -40,10 +40,10 @@
                                 <th>Status:</th>
                                 <td>
                                     <span th:class="'badge bg-' +
-                                        ${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).PENDING ? 'warning' :
-                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).APPROVED ? 'info' :
-                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE ? 'success' :
-                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).EXPIRED ? 'secondary' :
+                                        ${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).PENDING ? 'warning' :
+                                          permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).APPROVED ? 'info' :
+                                          permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).ACTIVE ? 'success' :
+                                          permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).EXPIRED ? 'secondary' :
                                           'danger'}"
                                           th:text="${permission.status}">
                                     </span>
@@ -118,7 +118,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <form th:if="${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).PENDING}"
+                            <form th:if="${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).PENDING}"
                                   th:action="@{/permissions/{id}/approve(id=${permission.id})}"
                                   method="post">
                                 <button type="submit" class="btn btn-success w-100">
@@ -126,7 +126,7 @@
                                 </button>
                             </form>
 
-                            <form th:if="${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE}"
+                            <form th:if="${permission.status == T(com.delta.dms.ops.model.Permission.PermissionStatus).ACTIVE}"
                                   th:action="@{/permissions/{id}/revoke(id=${permission.id})}"
                                   method="post"
                                   onsubmit="return confirm('Are you sure you want to revoke this permission? MariaDB access will be immediately removed.');">
