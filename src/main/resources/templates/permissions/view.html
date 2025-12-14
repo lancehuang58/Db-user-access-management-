@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}">
+    <title>Permission Details</title>
+</head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container mt-4">
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-key"></i> Permission Details #<span th:text="${permission.id}"></span></h2>
+            <a href="/permissions" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5>Permission Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="30%">User:</th>
+                                <td><strong th:text="${permission.user.username}"></strong></td>
+                            </tr>
+                            <tr>
+                                <th>Resource:</th>
+                                <td><code th:text="${permission.resourceName}"></code></td>
+                            </tr>
+                            <tr>
+                                <th>Permission Type:</th>
+                                <td><span class="badge bg-info" th:text="${permission.type}"></span></td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    <span th:class="'badge bg-' +
+                                        ${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).PENDING ? 'warning' :
+                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).APPROVED ? 'info' :
+                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE ? 'success' :
+                                          permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).EXPIRED ? 'secondary' :
+                                          'danger'}"
+                                          th:text="${permission.status}">
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Start Time:</th>
+                                <td th:text="${#temporals.format(permission.startTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            </tr>
+                            <tr>
+                                <th>End Time:</th>
+                                <td th:text="${#temporals.format(permission.endTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            </tr>
+                            <tr th:if="${permission.description}">
+                                <th>Description:</th>
+                                <td th:text="${permission.description}"></td>
+                            </tr>
+                            <tr th:if="${permission.approvedBy}">
+                                <th>Approved By:</th>
+                                <td>
+                                    <span th:text="${permission.approvedBy}"></span>
+                                    <small th:text="'at ' + ${#temporals.format(permission.approvedAt, 'yyyy-MM-dd HH:mm')}"></small>
+                                </td>
+                            </tr>
+                            <tr th:if="${permission.revokedBy}">
+                                <th>Revoked By:</th>
+                                <td>
+                                    <span th:text="${permission.revokedBy}"></span>
+                                    <small th:text="'at ' + ${#temporals.format(permission.revokedAt, 'yyyy-MM-dd HH:mm')}"></small>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Event History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Event Type</th>
+                                        <th>Triggered By</th>
+                                        <th>Details</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="event : ${events}">
+                                        <td><span class="badge bg-secondary" th:text="${event.eventType}"></span></td>
+                                        <td th:text="${event.triggeredBy}"></td>
+                                        <td th:text="${event.eventDetails}"></td>
+                                        <td th:text="${#temporals.format(event.eventTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(events)}">
+                                        <td colspan="4" class="text-center text-muted">No events yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <form th:if="${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).PENDING}"
+                                  th:action="@{/permissions/{id}/approve(id=${permission.id})}"
+                                  method="post">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check-circle"></i> Approve & Activate
+                                </button>
+                            </form>
+
+                            <form th:if="${permission.status == T(com.userpermission.management.model.Permission.PermissionStatus).ACTIVE}"
+                                  th:action="@{/permissions/{id}/revoke(id=${permission.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Are you sure you want to revoke this permission? MariaDB access will be immediately removed.');">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="bi bi-x-circle"></i> Revoke Now
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <small>
+                                <i class="bi bi-info-circle"></i>
+                                <strong>MariaDB Event:</strong>
+                                When activated, a database event named <code>revoke_perm_<span th:text="${permission.id}"></span></code>
+                                will be created to automatically revoke access at the end time.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>
