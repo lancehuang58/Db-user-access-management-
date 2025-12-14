@@ -156,4 +156,9 @@ public class PermissionService {
     public List<Permission> getPermissionsExpiringBetween(LocalDateTime start, LocalDateTime end) {
         return permissionRepository.findPermissionsExpiringBetween(start, end);
     }
+
+    @Transactional(readOnly = true)
+    public List<Permission> getPermissionsByStatus(Permission.PermissionStatus status) {
+        return permissionRepository.findByStatus(status);
+    }
 }
