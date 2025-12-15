@@ -12,7 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * User entity representing a database user
+ * User entity representing a system user (admin/operator who logs into this management application).
+ * This is NOT for MariaDB database users - those are managed directly via SQL.
  */
 @Entity
 @Table(name = "users")
@@ -56,9 +57,6 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Permission> permissions = new HashSet<>();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

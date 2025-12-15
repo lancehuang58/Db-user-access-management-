@@ -38,27 +38,32 @@ public class PermissionService {
     }
 
     @Transactional(readOnly = true)
-    public List<Permission> getPermissionsByUserId(Long userId) {
-        return permissionRepository.findByUserId(userId);
+    public List<Permission> getPermissionsByMariaDBUsername(String mariadbUsername) {
+        return permissionRepository.findByMariadbUsername(mariadbUsername);
     }
 
     @Transactional(readOnly = true)
-    public List<Permission> getActivePermissionsByUserId(Long userId) {
-        return permissionRepository.findActivePermissionsByUserId(userId);
+    public List<Permission> getActivePermissionsByMariaDBUsername(String mariadbUsername) {
+        return permissionRepository.findActivePermissionsByMariaDBUsername(mariadbUsername);
     }
 
     @Transactional
     public Permission createPermission(Permission permission, String createdBy) {
-        User user = userRepository.findById(permission.getUser().getId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        // Validate that MariaDB username and host are set
+        if (permission.getMariadbUsername() == null || permission.getMariadbUsername().isEmpty()) {
+            throw new IllegalArgumentException("MariaDB username is required");
+        }
+        if (permission.getMariadbHost() == null || permission.getMariadbHost().isEmpty()) {
+            throw new IllegalArgumentException("MariaDB host is required");
+        }
 
-        permission.setUser(user);
         permission.setStatus(Permission.PermissionStatus.PENDING);
         Permission savedPermission = permissionRepository.save(permission);
 
         // Publish event
         eventPublisher.publishEvent(new PermissionCreatedEvent(this, savedPermission, createdBy));
-        log.info("Permission created for user {} by {}", user.getUsername(), createdBy);
+        log.info("Permission created for MariaDB user '{}@{}' by {}",
+                permission.getMariadbUsername(), permission.getMariadbHost(), createdBy);
 
         return savedPermission;
     }

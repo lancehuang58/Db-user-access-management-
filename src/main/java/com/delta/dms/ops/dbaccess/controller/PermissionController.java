@@ -1,10 +1,10 @@
 package com.delta.dms.ops.dbaccess.controller;
 
+import com.delta.dms.ops.dbaccess.dto.MariaDBUserInfo;
 import com.delta.dms.ops.dbaccess.model.Permission;
-import com.delta.dms.ops.dbaccess.model.User;
 import com.delta.dms.ops.dbaccess.repository.PermissionEventRepository;
+import com.delta.dms.ops.dbaccess.service.MariaDBEventService;
 import com.delta.dms.ops.dbaccess.service.PermissionService;
-import com.delta.dms.ops.dbaccess.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -24,7 +24,7 @@ import java.util.List;
 public class PermissionController {
 
     private final PermissionService permissionService;
-    private final UserService userService;
+    private final MariaDBEventService mariaDBEventService;
     private final PermissionEventRepository permissionEventRepository;
 
     @GetMapping
@@ -37,7 +37,8 @@ public class PermissionController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("permission", new Permission());
-        model.addAttribute("users", userService.getAllUsers());
+        List<MariaDBUserInfo> mariadbUsers = mariaDBEventService.listMariaDBUsers();
+        model.addAttribute("mariadbUsers", mariadbUsers);
         model.addAttribute("permissionTypes", Permission.PermissionType.values());
         return "permissions/form";
     }
@@ -52,14 +53,13 @@ public class PermissionController {
 
     @PostMapping
     public String createPermission(@ModelAttribute Permission permission,
-                                   @RequestParam Long userId,
+                                   @RequestParam String mariadbUsername,
+                                   @RequestParam String mariadbHost,
                                    Authentication authentication,
                                    RedirectAttributes redirectAttributes) {
         try {
-            User user = userService.getUserById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-            permission.setUser(user);
+            permission.setMariadbUsername(mariadbUsername);
+            permission.setMariadbHost(mariadbHost);
             String createdBy = authentication != null ? authentication.getName() : "SYSTEM";
             permissionService.createPermission(permission, createdBy);
 

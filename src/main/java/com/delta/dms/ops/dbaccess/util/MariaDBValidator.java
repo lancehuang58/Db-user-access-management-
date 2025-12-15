@@ -18,8 +18,8 @@ public class MariaDBValidator {
     private static final int MAX_USERNAME_LENGTH = 32;  // MariaDB username limit
     private static final int MAX_PASSWORD_LENGTH = 256;
 
-    // Pattern for valid MariaDB usernames (alphanumeric, underscore, dollar)
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_$]+$");
+    // Pattern for valid MariaDB usernames (alphanumeric, underscore, dollar, dot)
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_$.]+$");
 
     // Pattern for valid database/table names
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z0-9_$]+$");
@@ -43,10 +43,10 @@ public class MariaDBValidator {
 
         if (!USERNAME_PATTERN.matcher(username).matches()) {
             throw MariaDBValidationException.invalidIdentifier(username,
-                "contains invalid characters. Only alphanumeric, underscore, and dollar sign are allowed");
+                "contains invalid characters. Only alphanumeric, underscore, dot, and dollar sign are allowed");
         }
 
-        // Username cannot start with a digit
+        // Username cannot start with a digit (but can start with a dot for special accounts)
         if (Character.isDigit(username.charAt(0))) {
             throw MariaDBValidationException.invalidIdentifier(username,
                 "cannot start with a digit");
@@ -263,11 +263,16 @@ public class MariaDBValidator {
             throw MariaDBValidationException.missingParameter("permission");
         }
 
-        if (permission.getUser() == null) {
-            throw MariaDBValidationException.missingParameter("permission.user");
+        if (permission.getMariadbUsername() == null || permission.getMariadbUsername().isEmpty()) {
+            throw MariaDBValidationException.missingParameter("permission.mariadbUsername");
         }
 
-        validateUsername(permission.getUser().getUsername());
+        if (permission.getMariadbHost() == null || permission.getMariadbHost().isEmpty()) {
+            throw MariaDBValidationException.missingParameter("permission.mariadbHost");
+        }
+
+        validateUsername(permission.getMariadbUsername());
+        validateHost(permission.getMariadbHost());
         validateResourceName(permission.getResourceName());
         validateTimeRange(permission.getStartTime(), permission.getEndTime());
 

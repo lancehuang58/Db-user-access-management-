@@ -13,8 +13,13 @@ import java.util.List;
 @Data
 public class BulkPermissionRequest {
 
-    @NotNull(message = "請選擇用戶")
-    private Long userId;
+    @NotNull(message = "請選擇MariaDB用戶")
+    @NotEmpty(message = "請選擇MariaDB用戶")
+    private String mariadbUsername;
+
+    @NotNull(message = "請選擇Host")
+    @NotEmpty(message = "請選擇Host")
+    private String mariadbHost;
 
     @NotEmpty(message = "請至少選擇一個資料庫或資源")
     private List<String> resourceNames;

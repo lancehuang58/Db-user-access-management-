@@ -23,9 +23,12 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    // MariaDB user that this permission applies to
+    @Column(nullable = false, length = 64)
+    private String mariadbUsername;
+
+    @Column(nullable = false, length = 255)
+    private String mariadbHost;
 
     @Column(nullable = false, length = 100)
     private String resourceName;

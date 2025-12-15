@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head}">
-    <title>User Form</title>
+    <title>MariaDB User Form</title>
 </head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
@@ -13,114 +13,111 @@
                     <div class="card-header bg-primary text-white">
                         <h4 class="mb-0">
                             <i class="bi bi-database"></i>
-                            <span th:text="${user.id == null} ? 'Create New Database Account' : 'Edit Database Account'"></span>
+                            <span th:text="${user.username == null} ? 'Create New MariaDB User' : 'Change Password for MariaDB User'"></span>
                         </h4>
                     </div>
                     <div class="card-body">
-                        <form th:action="${user.id == null} ? @{/users} : @{/users/{id}(id=${user.id})}"
-                              th:object="${user}"
+                        <form th:action="${user.username == null} ? @{/users} : @{/users/{username}/{host}(username=${user.username},host=${user.host})}"
                               method="post">
 
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username *</label>
-                                <input type="text"
-                                       class="form-control"
-                                       id="username"
-                                       th:field="*{username}"
-                                       required
-                                       th:disabled="${user.id != null}">
-                                <small class="form-text text-muted">
-                                    Username cannot be changed after creation
-                                </small>
-                            </div>
-
-                            <div class="mb-3" th:if="${user.id == null}">
-                                <label for="password" class="form-label">Password *</label>
-                                <input type="password"
-                                       class="form-control"
-                                       id="password"
-                                       th:field="*{password}"
-                                       required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="fullName" class="form-label">Full Name</label>
-                                <input type="text"
-                                       class="form-control"
-                                       id="fullName"
-                                       th:field="*{fullName}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email *</label>
-                                <input type="email"
-                                       class="form-control"
-                                       id="email"
-                                       th:field="*{email}"
-                                       required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Roles *</label>
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div th:each="role : ${roles}" class="form-check">
-                                            <input type="checkbox"
-                                                   class="form-check-input"
-                                                   th:id="'role_' + ${role.id}"
-                                                   name="roleIds"
-                                                   th:value="${role.id}"
-                                                   th:checked="${user.roles != null && user.roles.contains(role)}">
-                                            <label class="form-check-label" th:for="'role_' + ${role.id}">
-                                                <strong th:text="${role.name}"></strong>
-                                                <small class="text-muted" th:if="${role.description}" th:text="' - ' + ${role.description}"></small>
-                                            </label>
-                                        </div>
-                                    </div>
+                            <!-- Create Mode -->
+                            <div th:if="${user.username == null}">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username *</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="username"
+                                           name="username"
+                                           required
+                                           pattern="[a-zA-Z0-9_$.]+"
+                                           maxlength="32"
+                                           placeholder="Enter database username">
+                                    <small class="form-text text-muted">
+                                        Alphanumeric characters, underscore, dot, and dollar sign only (max 32 chars)
+                                    </small>
                                 </div>
-                                <small class="form-text text-muted">
-                                    Select at least one role for the user
-                                </small>
+
+                                <div class="mb-3">
+                                    <label for="host" class="form-label">Host Pattern *</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="host"
+                                           name="host"
+                                           th:value="${user.host}"
+                                           required
+                                           placeholder="% or localhost or 192.168.1.%">
+                                    <small class="form-text text-muted">
+                                        Use % for any host, localhost for local only, or specific IP/hostname pattern
+                                    </small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password *</label>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="password"
+                                           name="password"
+                                           required
+                                           minlength="8"
+                                           placeholder="Enter a strong password">
+                                    <small class="form-text text-muted">
+                                        Minimum 8 characters
+                                    </small>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    <strong>Note:</strong> This will create a new MariaDB database user.
+                                    The user will be created with no privileges initially.
+                                    You can grant permissions after creation.
+                                </div>
                             </div>
 
-                            <div class="mb-3" th:if="${user.id != null}">
-                                <label for="newPassword" class="form-label">New Password</label>
-                                <input type="password"
-                                       class="form-control"
-                                       id="newPassword"
-                                       name="newPassword"
-                                       placeholder="Leave blank to keep current password">
-                                <small class="form-text text-muted">
-                                    Only fill this if you want to change the password
-                                </small>
+                            <!-- Edit Mode (Password Change) -->
+                            <div th:if="${user.username != null}">
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           th:value="${user.username}"
+                                           disabled>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Host</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           th:value="${user.host}"
+                                           disabled>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">New Password *</label>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="newPassword"
+                                           name="newPassword"
+                                           required
+                                           minlength="8"
+                                           placeholder="Enter new password">
+                                    <small class="form-text text-muted">
+                                        Minimum 8 characters
+                                    </small>
+                                </div>
+
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <strong>Warning:</strong> Changing the password will affect all applications using this MariaDB account.
+                                </div>
                             </div>
 
-                            <div class="mb-3 form-check">
-                                <input type="checkbox"
-                                       class="form-check-input"
-                                       id="enabled"
-                                       th:field="*{enabled}">
-                                <label class="form-check-label" for="enabled">
-                                    Account Enabled
-                                </label>
-                            </div>
-
-                            <div class="mb-3 form-check">
-                                <input type="checkbox"
-                                       class="form-check-input"
-                                       id="accountNonLocked"
-                                       th:field="*{accountNonLocked}">
-                                <label class="form-check-label" for="accountNonLocked">
-                                    Account Not Locked
-                                </label>
-                            </div>
-
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between mt-4">
                                 <a href="/users" class="btn btn-secondary">
                                     <i class="bi bi-arrow-left"></i> Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-check-circle"></i> Save User
+                                    <i class="bi bi-check-circle"></i>
+                                    <span th:text="${user.username == null} ? 'Create User' : 'Change Password'"></span>
                                 </button>
                             </div>
                         </form>

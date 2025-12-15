@@ -18,7 +18,10 @@
       "Bash(/usr/libexec/java_home:*)",
       "Bash(./gradlew clean compileJava:*)",
       "Bash(curl:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(./gradlew build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

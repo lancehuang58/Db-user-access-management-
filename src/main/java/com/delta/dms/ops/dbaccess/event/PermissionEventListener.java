@@ -42,8 +42,9 @@ public class PermissionEventListener {
         permissionEvent.setEventType(PermissionEvent.EventType.CREATED);
         permissionEvent.setTriggeredBy(event.getCreatedBy());
         permissionEvent.setEventDetails(String.format(
-            "Permission created for user %s on resource %s",
-            event.getPermission().getUser().getUsername(),
+            "Permission created for MariaDB user '%s'@'%s' on resource %s",
+            event.getPermission().getMariadbUsername(),
+            event.getPermission().getMariadbHost(),
             event.getPermission().getResourceName()
         ));
         permissionEvent.setEventTime(LocalDateTime.now());
@@ -92,8 +93,9 @@ public class PermissionEventListener {
             permissionEvent.setEventType(PermissionEvent.EventType.ACTIVATED);
             permissionEvent.setTriggeredBy("SYSTEM");
             permissionEvent.setEventDetails(String.format(
-                "Permission activated. MariaDB access granted to user %s on %s with auto-revoke scheduled at %s",
-                permission.getUser().getUsername(),
+                "Permission activated. MariaDB access granted to user '%s'@'%s' on %s with auto-revoke scheduled at %s",
+                permission.getMariadbUsername(),
+                permission.getMariadbHost(),
                 permission.getResourceName(),
                 permission.getEndTime()
             ));
@@ -175,9 +177,10 @@ public class PermissionEventListener {
             permissionEvent.setEventType(PermissionEvent.EventType.REVOKED);
             permissionEvent.setTriggeredBy(event.getRevokedBy());
             permissionEvent.setEventDetails(String.format(
-                "Permission revoked by %s. MariaDB access removed from user %s",
+                "Permission revoked by %s. MariaDB access removed from user '%s'@'%s'",
                 event.getRevokedBy(),
-                permission.getUser().getUsername()
+                permission.getMariadbUsername(),
+                permission.getMariadbHost()
             ));
             permissionEvent.setEventTime(LocalDateTime.now());
             eventRepository.save(permissionEvent);
@@ -247,8 +250,9 @@ public class PermissionEventListener {
         permissionEvent.setEventType(PermissionEvent.EventType.EXPIRED);
         permissionEvent.setTriggeredBy("SYSTEM");
         permissionEvent.setEventDetails(String.format(
-            "Permission expired. MariaDB access should be automatically revoked by scheduled event for user %s",
-            permission.getUser().getUsername()
+            "Permission expired. MariaDB access should be automatically revoked by scheduled event for user '%s'@'%s'",
+            permission.getMariadbUsername(),
+            permission.getMariadbHost()
         ));
         permissionEvent.setEventTime(LocalDateTime.now());
         eventRepository.save(permissionEvent);

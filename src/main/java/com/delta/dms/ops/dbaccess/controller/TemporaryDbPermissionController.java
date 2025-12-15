@@ -1,12 +1,12 @@
 package com.delta.dms.ops.dbaccess.controller;
 
 import com.delta.dms.ops.dbaccess.dto.BulkPermissionRequest;
+import com.delta.dms.ops.dbaccess.dto.MariaDBUserInfo;
 import com.delta.dms.ops.dbaccess.model.Permission;
 import com.delta.dms.ops.dbaccess.model.Permission.PermissionStatus;
 import com.delta.dms.ops.dbaccess.model.Permission.PermissionType;
-import com.delta.dms.ops.dbaccess.model.User;
+import com.delta.dms.ops.dbaccess.service.MariaDBEventService;
 import com.delta.dms.ops.dbaccess.service.PermissionService;
-import com.delta.dms.ops.dbaccess.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,27 +31,27 @@ import java.util.List;
 public class TemporaryDbPermissionController {
 
     private final PermissionService permissionService;
-    private final UserService userService;
+    private final MariaDBEventService mariaDBEventService;
 
     /**
      * Display the temporary permission management page
      */
     @GetMapping
     public String showTempPermissionPage(
-            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String mariadbUsername,
             @RequestParam(required = false) String status,
             Model model) {
 
         log.info("Accessing temporary permission management page");
 
-        // Get all users for selection
-        List<User> users = userService.getAllUsers();
-        model.addAttribute("users", users);
+        // Get all MariaDB users for selection
+        List<MariaDBUserInfo> mariadbUsers = mariaDBEventService.listMariaDBUsers();
+        model.addAttribute("mariadbUsers", mariadbUsers);
 
         // Get permissions based on filters
         List<Permission> permissions;
-        if (userId != null) {
-            permissions = permissionService.getPermissionsByUserId(userId);
+        if (mariadbUsername != null && !mariadbUsername.isEmpty()) {
+            permissions = permissionService.getPermissionsByMariaDBUsername(mariadbUsername);
         } else if (status != null && !status.isEmpty()) {
             permissions = permissionService.getPermissionsByStatus(PermissionStatus.valueOf(status));
         } else {
@@ -59,7 +59,7 @@ public class TemporaryDbPermissionController {
         }
 
         model.addAttribute("permissions", permissions);
-        model.addAttribute("selectedUserId", userId);
+        model.addAttribute("selectedUsername", mariadbUsername);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("bulkRequest", new BulkPermissionRequest());
 
@@ -83,14 +83,21 @@ public class TemporaryDbPermissionController {
 
         try {
             String currentUsername = authentication.getName();
-            User user = userService.getUserById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            String mariadbUsername = request.getMariadbUsername();
+            String mariadbHost = request.getMariadbHost();
+
+            if (mariadbUsername == null || mariadbUsername.isEmpty()) {
+                throw new IllegalArgumentException("MariaDB username is required");
+            }
+            if (mariadbHost == null || mariadbHost.isEmpty()) {
+                throw new IllegalArgumentException("MariaDB host is required");
+            }
 
             LocalDateTime startTime = LocalDateTime.now();
             LocalDateTime endTime = calculateEndTime(startTime, request.getDurationDays());
 
-            log.info("Granting bulk permissions to user: {} for {} days",
-                    user.getUsername(), request.getDurationDays());
+            log.info("Granting bulk permissions to MariaDB user '{}@{}' for {} days",
+                    mariadbUsername, mariadbHost, request.getDurationDays());
 
             int createdCount = 0;
 
@@ -98,22 +105,23 @@ public class TemporaryDbPermissionController {
             for (String resourceName : request.getResourceNames()) {
                 for (String permissionType : request.getPermissionTypes()) {
                     Permission permission = new Permission();
-                    permission.setUser(user);
+                    permission.setMariadbUsername(mariadbUsername);
+                    permission.setMariadbHost(mariadbHost);
                     permission.setResourceName(resourceName);
                     permission.setType(PermissionType.valueOf(permissionType));
                     permission.setStartTime(startTime);
                     permission.setEndTime(endTime);
-                    permission.setStatus(PermissionStatus.PENDING); // Will be approved immediately after creation
+                    permission.setStatus(PermissionStatus.PENDING);
                     permission.setDescription(String.format("臨時權限 - %d天有效期", request.getDurationDays()));
 
                     permissionService.createPermission(permission, currentUsername);
 
                     // Auto-approve and activate immediately
-                    Permission created = permissionService.getPermissionsByUserId(user.getId())
+                    Permission created = permissionService.getPermissionsByMariaDBUsername(mariadbUsername)
                             .stream()
                             .filter(p -> p.getResourceName().equals(resourceName)
                                     && p.getType().toString().equals(permissionType)
-                                    && p.getStatus() == PermissionStatus.APPROVED)
+                                    && p.getMariadbHost().equals(mariadbHost))
                             .findFirst()
                             .orElse(null);
 
@@ -125,8 +133,8 @@ public class TemporaryDbPermissionController {
             }
 
             redirectAttributes.addFlashAttribute("success",
-                    String.format("成功授予 %d 個權限給用戶 %s，有效期 %d 天",
-                            createdCount, user.getUsername(), request.getDurationDays()));
+                    String.format("成功授予 %d 個權限給用戶 %s@%s，有效期 %d 天",
+                            createdCount, mariadbUsername, mariadbHost, request.getDurationDays()));
 
         } catch (Exception e) {
             log.error("Error granting bulk permissions", e);
@@ -185,12 +193,12 @@ public class TemporaryDbPermissionController {
     }
 
     /**
-     * Get active permissions for a specific user (AJAX endpoint)
+     * Get active permissions for a specific MariaDB user (AJAX endpoint)
      */
-    @GetMapping("/user/{userId}/active")
+    @GetMapping("/user/{mariadbUsername}/active")
     @ResponseBody
-    public List<Permission> getActivePermissions(@PathVariable Long userId) {
-        return permissionService.getActivePermissionsByUserId(userId);
+    public List<Permission> getActivePermissions(@PathVariable String mariadbUsername) {
+        return permissionService.getActivePermissionsByMariaDBUsername(mariadbUsername);
     }
 
     /**

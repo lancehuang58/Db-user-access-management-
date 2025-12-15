@@ -1,7 +1,6 @@
 package com.delta.dms.ops.dbaccess.repository;
 
 import com.delta.dms.ops.dbaccess.model.Permission;
-import com.delta.dms.ops.dbaccess.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,21 +15,27 @@ import java.util.List;
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Long> {
 
-    List<Permission> findByUser(User user);
+    // Find by MariaDB username
+    List<Permission> findByMariadbUsername(String mariadbUsername);
 
-    List<Permission> findByUserId(Long userId);
+    // Find by MariaDB username and host
+    List<Permission> findByMariadbUsernameAndMariadbHost(String mariadbUsername, String mariadbHost);
 
+    // Find by status
     List<Permission> findByStatus(Permission.PermissionStatus status);
 
+    // Find expired permissions
     @Query("SELECT p FROM Permission p WHERE p.status = :status AND p.endTime < :now")
     List<Permission> findExpiredPermissions(
         @Param("status") Permission.PermissionStatus status,
         @Param("now") LocalDateTime now
     );
 
-    @Query("SELECT p FROM Permission p WHERE p.user.id = :userId AND p.status = 'ACTIVE'")
-    List<Permission> findActivePermissionsByUserId(@Param("userId") Long userId);
+    // Find active permissions by MariaDB username
+    @Query("SELECT p FROM Permission p WHERE p.mariadbUsername = :username AND p.status = 'ACTIVE'")
+    List<Permission> findActivePermissionsByMariaDBUsername(@Param("username") String username);
 
+    // Find permissions expiring soon
     @Query("SELECT p FROM Permission p WHERE p.status = 'ACTIVE' AND p.endTime BETWEEN :start AND :end")
     List<Permission> findPermissionsExpiringBetween(
         @Param("start") LocalDateTime start,

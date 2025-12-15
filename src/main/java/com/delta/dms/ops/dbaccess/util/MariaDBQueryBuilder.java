@@ -126,7 +126,7 @@ public class MariaDBQueryBuilder {
      * Returns SQL with placeholder for password to be used with PreparedStatement.
      */
     public static String buildCreateUser(String username, String host) {
-        validateIdentifier(username, false);
+        validateIdentifier(username, true);  // Allow dots in usernames
 
         // Host can be %, localhost, IP address, or hostname pattern
         if (host == null || host.isEmpty()) {
@@ -145,7 +145,7 @@ public class MariaDBQueryBuilder {
      * Build a DROP USER statement.
      */
     public static String buildDropUser(String username, String host) {
-        validateIdentifier(username, false);
+        validateIdentifier(username, true);  // Allow dots in usernames
 
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("Host cannot be null or empty");
@@ -163,7 +163,7 @@ public class MariaDBQueryBuilder {
      * Returns SQL with placeholder for new password.
      */
     public static String buildAlterUserPassword(String username, String host) {
-        validateIdentifier(username, false);
+        validateIdentifier(username, true);  // Allow dots in usernames
 
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("Host cannot be null or empty");
@@ -185,7 +185,7 @@ public class MariaDBQueryBuilder {
             throw new IllegalArgumentException("Privileges list cannot be null or empty");
         }
 
-        validateIdentifier(username, false);
+        validateIdentifier(username, true);  // Allow dots in usernames
 
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("Host cannot be null or empty");
@@ -212,7 +212,7 @@ public class MariaDBQueryBuilder {
             throw new IllegalArgumentException("Privileges list cannot be null or empty");
         }
 
-        validateIdentifier(username, false);
+        validateIdentifier(username, true);  // Allow dots in usernames
 
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("Host cannot be null or empty");
@@ -290,8 +290,8 @@ public class MariaDBQueryBuilder {
     public static String buildCreateRevokeEvent(String eventName, LocalDateTime scheduleTime,
                                                List<String> privileges, ResourceType resourceType,
                                                String resourceName, String username, String host) {
-        validateIdentifier(eventName, false);
-        validateIdentifier(username, false);
+        validateIdentifier(eventName, false);  // Event names don't need dots
+        validateIdentifier(username, true);    // Allow dots in usernames
 
         if (scheduleTime == null) {
             throw new IllegalArgumentException("Schedule time cannot be null");
@@ -347,18 +347,20 @@ public class MariaDBQueryBuilder {
 
     /**
      * Build query to list all users.
+     * Uses only basic columns for compatibility with all MariaDB versions.
      */
     public static String buildListUsersQuery() {
-        return "SELECT user, host, account_locked, password_expired FROM mysql.user " +
+        return "SELECT user, host FROM mysql.user " +
                "WHERE user NOT IN ('root', 'mysql.sys', 'mysql.session', 'mysql.infoschema') " +
                "ORDER BY user, host";
     }
 
     /**
      * Build query to get user information.
+     * Uses only basic columns for compatibility with all MariaDB versions.
      */
     public static String buildGetUserInfoQuery() {
-        return "SELECT user, host, account_locked, password_expired FROM mysql.user " +
+        return "SELECT user, host FROM mysql.user " +
                "WHERE user = ? AND host = ?";
     }
 
@@ -366,7 +368,7 @@ public class MariaDBQueryBuilder {
      * Build query to show grants for a user.
      */
     public static String buildShowGrantsQuery(String username, String host) {
-        validateIdentifier(username, false);
+        validateIdentifier(username, true);  // Allow dots in usernames
 
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException("Host cannot be null or empty");

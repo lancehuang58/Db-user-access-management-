@@ -28,6 +28,9 @@ public interface PermissionEventRepository extends JpaRepository<PermissionEvent
         @Param("end") LocalDateTime end
     );
 
-    @Query("SELECT pe FROM PermissionEvent pe WHERE pe.permission.user.id = :userId ORDER BY pe.eventTime DESC")
-    List<PermissionEvent> findEventsByUserId(@Param("userId") Long userId);
+    @Query("SELECT pe FROM PermissionEvent pe WHERE pe.permission.mariadbUsername = :username ORDER BY pe.eventTime DESC")
+    List<PermissionEvent> findEventsByMariaDBUsername(@Param("username") String mariadbUsername);
+
+    @Query("SELECT pe FROM PermissionEvent pe WHERE pe.permission.mariadbUsername = :username AND pe.permission.mariadbHost = :host ORDER BY pe.eventTime DESC")
+    List<PermissionEvent> findEventsByMariaDBUser(@Param("username") String mariadbUsername, @Param("host") String mariadbHost);
 }

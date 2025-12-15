@@ -52,25 +52,26 @@ public class MariaDBEventService {
         // Validate permission
         MariaDBValidator.validatePermission(permission);
 
-        String dbUsername = permission.getUser().getUsername();
+        String dbUsername = permission.getMariadbUsername();
+        String dbHost = permission.getMariadbHost();
         String resourceName = permission.getResourceName();
         Permission.PermissionType type = permission.getType();
         LocalDateTime endTime = permission.getEndTime();
 
-        log.info("Granting {} permission on {} to user {} with auto-revoke at {}",
-                 type, resourceName, dbUsername, endTime);
+        log.info("Granting {} permission on {} to user '{}@{}' with auto-revoke at {}",
+                 type, resourceName, dbUsername, dbHost, endTime);
 
         try {
             // Create or update MariaDB user if needed
-            ensureMariaDBUserExists(dbUsername, defaultHost);
+            ensureMariaDBUserExists(dbUsername, dbHost);
 
             // Grant the appropriate permissions
-            grantDatabasePermission(dbUsername, defaultHost, resourceName, type);
+            grantDatabasePermission(dbUsername, dbHost, resourceName, type);
 
             // Create MariaDB event for auto-revoke
-            createRevokeEvent(permission.getId(), dbUsername, defaultHost, resourceName, type, endTime);
+            createRevokeEvent(permission.getId(), dbUsername, dbHost, resourceName, type, endTime);
 
-            log.info("Successfully granted {} permission on {} to user {}", type, resourceName, dbUsername);
+            log.info("Successfully granted {} permission on {} to user '{}@{}'", type, resourceName, dbUsername, dbHost);
 
         } catch (MariaDBValidationException | MariaDBPermissionException e) {
             // Re-throw validation and permission exceptions
@@ -241,14 +242,16 @@ public class MariaDBEventService {
             throw MariaDBValidationException.missingParameter("permission");
         }
 
-        String username = permission.getUser().getUsername();
+        String username = permission.getMariadbUsername();
+        String host = permission.getMariadbHost();
         String resourceName = permission.getResourceName();
         Permission.PermissionType type = permission.getType();
 
         MariaDBValidator.validateUsername(username);
+        MariaDBValidator.validateHost(host);
         MariaDBValidator.validateResourceName(resourceName);
 
-        log.info("Revoking {} permission on {} from user '{}'", type, resourceName, username);
+        log.info("Revoking {} permission on {} from user '{}@{}'", type, resourceName, username, host);
 
         try {
             // Get privileges list
@@ -259,7 +262,7 @@ public class MariaDBEventService {
 
             // Build and execute REVOKE statement
             String revokeSql = MariaDBQueryBuilder.buildRevokeStatement(
-                privileges, resourceType, resourceName, username, defaultHost
+                privileges, resourceType, resourceName, username, host
             );
 
             jdbcTemplate.execute(revokeSql);
@@ -270,7 +273,7 @@ public class MariaDBEventService {
             String dropEventSql = MariaDBQueryBuilder.buildDropEvent(eventName);
             jdbcTemplate.execute(dropEventSql);
 
-            log.info("Revoked {} permissions on {} from '{}'", String.join(", ", privileges), resourceName, username);
+            log.info("Revoked {} permissions on {} from '{}@{}'", String.join(", ", privileges), resourceName, username, host);
 
         } catch (MariaDBValidationException e) {
             throw e;
@@ -438,8 +441,8 @@ public class MariaDBEventService {
                 new com.delta.dms.ops.dbaccess.dto.MariaDBUserInfo(
                     rs.getString("user"),
                     rs.getString("host"),
-                    rs.getString("account_locked"),
-                    rs.getString("password_expired")
+                    "N",  // account_locked - default to unlocked for compatibility
+                    "N"   // password_expired - default to not expired for compatibility
                 )
             );
         } catch (DataAccessException e) {
@@ -473,8 +476,8 @@ public class MariaDBEventService {
                 (rs, rowNum) -> new com.delta.dms.ops.dbaccess.dto.MariaDBUserInfo(
                     rs.getString("user"),
                     rs.getString("host"),
-                    rs.getString("account_locked"),
-                    rs.getString("password_expired")
+                    "N",  // account_locked - default to unlocked for compatibility
+                    "N"   // password_expired - default to not expired for compatibility
                 ),
                 username,
                 host
